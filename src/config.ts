@@ -38,6 +38,7 @@ export interface SingleContainerConfig {
   env?: EnvironmentVariableMap;
   wait?: WaitConfig;
   bindMounts?: BindConfig[];
+  tmpFs?: TmpFsConfig[];
 }
 
 interface PortsWaitConfig {
@@ -58,6 +59,11 @@ export interface BindConfig {
 
 // https://github.com/testcontainers/testcontainers-node/blob/v2.7.0/src/docker-client.ts#L48
 export type BindMode = "ro" | "rw";
+
+export interface TmpFsConfig {
+  target: string;
+  options: string;
+}
 
 function assertWaitConfig(wait: any): void {
   if (wait === undefined) {

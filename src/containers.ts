@@ -14,7 +14,8 @@ import {
   JestTestcontainersConfig,
   SingleContainerConfig,
   WaitConfig,
-  BindConfig
+  BindConfig,
+  TmpFsConfig
 } from "./config";
 
 const addWaitStrategyToContainer = (waitStrategy?: WaitConfig) => (
@@ -66,6 +67,19 @@ const addBindsToContainer = (bindMounts?: BindConfig[]) => (
   return container;
 };
 
+const addTmpFsToContainer = (tmpFsConfigs?: TmpFsConfig[]) => (
+  container: TestContainer
+): TestContainer => {
+  if (!tmpFsConfigs) return container;
+
+  for (const tmpFsConfig of tmpFsConfigs) {
+    container.withTmpFs({
+      [tmpFsConfig.target]: tmpFsConfig.options
+    });
+  }
+  return container;
+};
+
 const addNameToContainer = (name?: string) => (
   container: GenericContainer
 ): TestContainer => {
@@ -78,14 +92,24 @@ const addNameToContainer = (name?: string) => (
 export function buildTestcontainer(
   containerConfig: SingleContainerConfig
 ): TestContainer {
-  const { image, tag, ports, name, env, wait, bindMounts } = containerConfig;
+  const {
+    image,
+    tag,
+    ports,
+    name,
+    env,
+    wait,
+    bindMounts,
+    tmpFs
+  } = containerConfig;
   const container = new GenericContainer(image, tag);
 
   return [
     addPortsToContainer(ports),
     addEnvironmentVariablesToContainer(env),
     addWaitStrategyToContainer(wait),
-    addBindsToContainer(bindMounts)
+    addBindsToContainer(bindMounts),
+    addTmpFsToContainer(tmpFs)
   ].reduce<TestContainer>(
     (res, func) => func(res),
     addNameToContainer(name)(container)
